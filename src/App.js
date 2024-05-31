@@ -36,7 +36,6 @@ function App() {
     console.log(response)   
   }
 
-  //eslint-disable-next-line react-hooks/exhaustive-dep
   useEffect(() => {
     return () => {
       const cleanup = async () => {
