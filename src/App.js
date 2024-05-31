@@ -3,6 +3,8 @@ import axios from "axios"
 import './App.css';
 console.log(process.env)
 const URL = process.env.REACT_APP_BACK_END_URL;
+
+console.log({URL})
 function App() {  
   const [messages, setMessages] = useState([]);
   const [enableFreeText, setEnableFreetext] = useState(false);
@@ -86,7 +88,6 @@ function App() {
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
-      console.log('eeeeeeeeeeeeeeeeeeeeee')
       postMessage();
     }
   };
