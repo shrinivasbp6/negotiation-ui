@@ -16,6 +16,7 @@ function App() {
     setEnableFreetext(true)
   };
   const bottomRef = useRef(null);
+
   useEffect(() => {
     // Scroll to the bottom of the container when the component mounts or messages update
     bottomRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -35,9 +36,8 @@ function App() {
     console.log(response)   
   }
 
+  //eslint-disable-next-line react-hooks/exhaustive-dep
   useEffect(() => {
-    // This code runs when the component mounts
-
     return () => {
       const cleanup = async () => {
         console.log('Component is unmounting');
