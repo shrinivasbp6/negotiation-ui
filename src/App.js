@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios"
+import { products } from "./constants";
 import './App.css';
 console.log(process.env)
 const URL = process.env.REACT_APP_BACK_END_URL;
 
-console.log({URL})
-function App() {  
+console.log({ URL })
+function App() {
   const [messages, setMessages] = useState([]);
   const [enableFreeText, setEnableFreetext] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -13,6 +14,8 @@ function App() {
   const [threadId, setThreadId] = useState(undefined);
   const [isbuttonDisables, setIsButtonDisabled] = useState(false);
   const [meta, setMeta] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(undefined);
+  const [quotePrices, setQuotePrice] = useState([]);
   const updateMessagetext = (text) => {
     setInputValue(text);
     setEnableFreetext(true)
@@ -34,8 +37,8 @@ function App() {
         'Content-Type': 'application/json; charset=utf-8',
       },
       credential: 'same-origin',
-    }); 
-    console.log(response)   
+    });
+    console.log(response)
   }
 
   useEffect(() => {
@@ -57,6 +60,7 @@ function App() {
     }
     const response = await axios.post(url, {
       message: inputValue,
+      productId: selectedProduct.id,
       assistantId,
       threadId
     }, {
@@ -65,7 +69,7 @@ function App() {
         'Content-Type': 'application/json; charset=utf-8',
       },
       credential: 'same-origin',
-    });    
+    });
     console.log(response.data)
     const data = response.data;
     setThreadId(data.threadId);
@@ -92,24 +96,57 @@ function App() {
     }
   };
 
+  const updateQuotePrice = product => {
+    console.log({product})
+    const total = product.price.reduce((acc, curr) => {
+      return acc + curr;
+    }, 0)
+    const average = total/product.price.length;
+    const toBeQuotePrice = [Math.round(average + (average * .35)), Math.round(average + (average * .2)), Math.round(average + (average * .03))];
+    setQuotePrice(toBeQuotePrice);
+    setIsButtonDisabled(false);
+  };
+
+  const setProductDetails = (event) => {
+    console.log(products)
+    console.log(event.target.value)
+    const product = products.find(item => item.id === +event.target.value);
+    console.log({product})
+    setSelectedProduct(product);
+    updateQuotePrice(product)
+  }
+
   return (
     <div className="container">
       <h1>Negotiation Bot</h1>
-      <h6>We will be negotiating for macbook pro, and target price will be around 2500</h6>
+      {selectedProduct ? <h6> Selected Product is {selectedProduct.brand} {selectedProduct.model}</h6> : 
+      <div className="intro-wrapper">
+        <h6>Select a product to negotiate</h6>
+        <select className="product-select" onChange={event => setProductDetails(event)}>
+          {products.map(item => (<option value={item.id}>
+            {item.brand} {item.model}
+          </option>))}
+        </select>
+      </div>}
       {!isbuttonDisables ? <div className="buttons-wrapper">
-        <button disabled={isbuttonDisables} onClick={() => updateMessagetext(`Hi, I'm here to negotiate for macbook pro and my quoted price is 3300`)}>
+        {quotePrices.map(price => (
+          <button disabled={isbuttonDisables} onClick={() => updateMessagetext(`Hi, I'm here to negotiate for ${selectedProduct.brand} ${selectedProduct.model} and my quoted price is ${price} inr`)}>
+          {price}
+        </button>
+        ))}
+        {/* <button disabled={isbuttonDisables} onClick={() => updateMessagetext(`Hi, I'm here to negotiate for macbook pro and my quoted price is 3300`)}>
           3300$
         </button>
-        <button  disabled={isbuttonDisables} onClick={() => updateMessagetext(`Hi, I'm here to negotiate for macbook pro and my quoted price is 2800`)}>
+        <button disabled={isbuttonDisables} onClick={() => updateMessagetext(`Hi, I'm here to negotiate for macbook pro and my quoted price is 2800`)}>
           2800$
         </button >
-        <button  disabled={isbuttonDisables} onClick={() => updateMessagetext(`Hi, I'm here to negotiate for macbook pro and my quoted price is 2600`)}>
+        <button disabled={isbuttonDisables} onClick={() => updateMessagetext(`Hi, I'm here to negotiate for macbook pro and my quoted price is 2600`)}>
           2600$
-        </button>
+        </button> */}
       </div> : (
-      <div className="info-wrapper">
-        <span style={{ color: 'red' }}>{meta}</span>
-      </div>)}
+        <div className="info-wrapper">
+          <span style={{ color: 'red' }}>{meta}</span>
+        </div>)}
       <div className="chat-container">
         <div className="chat-wrapper" ref={bottomRef}>
           {messages.map(msg => {
@@ -135,18 +172,18 @@ function App() {
           }
         </div>
         {enableFreeText && <div className="input-wrapper">
-          <input 
-          autoFocus
-          onChange={(event) => {
-            console.log(event.key);
-            if (event.key === 'Enter') {
-              postMessage()
-            }
-            setInputValue(event.target.value)
-          }} 
-          className="input" 
-          value={inputValue} 
-          onKeyDown={handleKeyDown}
+          <input
+            autoFocus
+            onChange={(event) => {
+              console.log(event.key);
+              if (event.key === 'Enter') {
+                postMessage()
+              }
+              setInputValue(event.target.value)
+            }}
+            className="input"
+            value={inputValue}
+            onKeyDown={handleKeyDown}
           />
           <button onClick={async () => await postMessage()}>Submit</button>
         </div>}
