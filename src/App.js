@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios"
+import axios from "axios";
 import { products } from "./constants";
 import './App.css';
 console.log(process.env)
@@ -7,6 +7,7 @@ const URL = process.env.REACT_APP_BACK_END_URL;
 
 console.log({ URL })
 function App() {
+
   const [messages, setMessages] = useState([]);
   const [enableFreeText, setEnableFreetext] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -38,16 +39,18 @@ function App() {
       },
       credential: 'same-origin',
     });
-    console.log(response)
+    console.log({ response })
   }
 
   useEffect(() => {
+    console.log('Component is mounting');
     return () => {
+      console.log('Component is unmounting 1');
+      debugger;
       const cleanup = async () => {
-        console.log('Component is unmounting');
+        console.log('Component is unmounting 2');
         await deleteAssistant();
       };
-
       cleanup();
     };
   }, []);
@@ -115,6 +118,11 @@ function App() {
     setSelectedProduct(product);
     updateQuotePrice(product)
   }
+
+  const redirect = () => {
+    window.location.href = '/anotherPagePath'
+ }
+
 
   return (
     <div className="container">
@@ -186,6 +194,7 @@ function App() {
             onKeyDown={handleKeyDown}
           />
           <button onClick={async () => await postMessage()}>Submit</button>
+          <button onClick={() =>redirect()}>Reload</button>
         </div>}
       </div>
     </div>
